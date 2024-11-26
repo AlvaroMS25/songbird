@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/driver/connection/mod.rs`."><title>mod.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-42caa33d.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="songbird" data-themes="" data-resource-suffix="" data-rustdoc-version="1.84.0-nightly (b19329a37 2024-11-21)" data-channel="nightly" data-search-js="search-92e6798f.js" data-settings-js="settings-0f613d39.js" ><script src="../../../../static.files/storage-59e33391.js"></script><script defer src="../../../../static.files/src-script-56102188.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-5f194d8c.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-893ab5e7.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/serenity-rs/songbird/current/songbird-ico.png"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1><div class="sub-heading">songbird/driver/connection/</div>mod.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/driver/connection/mod.rs`."><title>mod.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-42caa33d.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="songbird" data-themes="" data-resource-suffix="" data-rustdoc-version="1.85.0-nightly (28fc2ba71 2024-11-24)" data-channel="nightly" data-search-js="search-92e6798f.js" data-settings-js="settings-0f613d39.js" ><script src="../../../../static.files/storage-59e33391.js"></script><script defer src="../../../../static.files/src-script-56102188.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-5f194d8c.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-893ab5e7.css"></noscript><link rel="icon" href="https://raw.githubusercontent.com/serenity-rs/songbird/current/songbird-ico.png"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1><div class="sub-heading">songbird/driver/connection/</div>mod.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers">
 <a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
@@ -364,7 +364,13 @@
 <a href="#363" id="363">363</a>
 <a href="#364" id="364">364</a>
 <a href="#365" id="365">365</a>
-<a href="#366" id="366">366</a></pre></div><pre class="rust"><code><span class="kw">pub mod </span>error;
+<a href="#366" id="366">366</a>
+<a href="#367" id="367">367</a>
+<a href="#368" id="368">368</a>
+<a href="#369" id="369">369</a>
+<a href="#370" id="370">370</a>
+<a href="#371" id="371">371</a>
+<a href="#372" id="372">372</a></pre></div><pre class="rust"><code><span class="kw">pub mod </span>error;
 
 <span class="attr">#[cfg(feature = <span class="string">"receive"</span>)]
 </span><span class="kw">use </span><span class="kw">super</span>::tasks::udp_rx;
@@ -427,6 +433,7 @@
         <span class="kw">let </span>url = generate_url(<span class="kw-2">&amp;mut </span>info.endpoint)<span class="question-mark">?</span>;
 
         <span class="kw">let </span><span class="kw-2">mut </span>client = WsStream::connect(url).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>(ws_msg_tx, ws_msg_rx) = flume::unbounded();
 
         <span class="kw">let </span><span class="kw-2">mut </span>hello = <span class="prelude-val">None</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>ready = <span class="prelude-val">None</span>;
@@ -459,7 +466,11 @@
                     }
                 },
                 other =&gt; {
-                    <span class="macro">debug!</span>(<span class="string">"Expected ready/hello; got: {:?}"</span>, other);
+                    <span class="comment">// Discord hold back per-user connection state until after this handshake.
+                    // There's no guarantee that will remain the case, so buffer it like all
+                    // subsequent steps where we know they *do* send these packets.
+                    </span><span class="macro">debug!</span>(<span class="string">"Expected ready/hello; got: {:?}"</span>, other);
+                    ws_msg_tx.send(WsMessage::Deliver(other))<span class="question-mark">?</span>;
                 },
             }
         }
@@ -542,13 +553,12 @@
                 .<span class="kw">await</span><span class="question-mark">?</span>;
         }
 
-        <span class="kw">let </span>cipher = init_cipher(<span class="kw-2">&amp;mut </span>client, chosen_crypto).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>cipher = init_cipher(<span class="kw-2">&amp;mut </span>client, chosen_crypto, <span class="kw-2">&amp;</span>ws_msg_tx).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="macro">info!</span>(<span class="string">"Connected to: {}"</span>, info.endpoint);
 
         <span class="macro">info!</span>(<span class="string">"WS heartbeat duration {}ms."</span>, hello.heartbeat_interval);
 
-        <span class="kw">let </span>(ws_msg_tx, ws_msg_rx) = flume::unbounded();
         <span class="attr">#[cfg(feature = <span class="string">"receive"</span>)]
         </span><span class="kw">let </span>(udp_receiver_msg_tx, udp_receiver_msg_rx) = flume::unbounded();
 
@@ -670,7 +680,7 @@
                     }
                 },
                 other =&gt; {
-                    <span class="macro">debug!</span>(<span class="string">"Expected resumed/hello; got: {:?}"</span>, other);
+                    <span class="self">self</span>.ws.send(WsMessage::Deliver(other))<span class="question-mark">?</span>;
                 },
             }
         }
@@ -704,7 +714,11 @@
 }
 
 <span class="attr">#[inline]
-</span><span class="kw">async fn </span>init_cipher(client: <span class="kw-2">&amp;mut </span>WsStream, mode: CryptoMode) -&gt; <span class="prelude-ty">Result</span>&lt;Cipher&gt; {
+</span><span class="kw">async fn </span>init_cipher(
+    client: <span class="kw-2">&amp;mut </span>WsStream,
+    mode: CryptoMode,
+    tx: <span class="kw-2">&amp;</span>Sender&lt;WsMessage&gt;,
+) -&gt; <span class="prelude-ty">Result</span>&lt;Cipher&gt; {
     <span class="kw">loop </span>{
         <span class="kw">let </span><span class="prelude-val">Some</span>(value) = client.recv_json().<span class="kw">await</span><span class="question-mark">? </span><span class="kw">else </span>{
             <span class="kw">continue</span>;
@@ -721,11 +735,9 @@
                     .map_err(|<span class="kw">_</span>| Error::CryptoInvalidLength);
             },
             other =&gt; {
-                <span class="macro">debug!</span>(
-                    <span class="string">"Expected ready for key; got: op{}/v{:?}"</span>,
-                    other.kind() <span class="kw">as </span>u8,
-                    other
-                );
+                <span class="comment">// Discord can and will send user-specific payload packets during this time
+                // which are needed to map SSRCs to `UserId`s.
+                </span>tx.send(WsMessage::Deliver(other))<span class="question-mark">?</span>;
             },
         }
     }
